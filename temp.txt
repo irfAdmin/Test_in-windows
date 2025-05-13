@@ -1,0 +1,62 @@
+            //121-182
+            locationText.setText("VTU :" + vtuId);
+            locationText.append("\nData: " + datapayload);
+            locationText.append("\nOffset: " + offset);
+            //locationText.append("\nPassing Code " + pushCode);
+            double curLat =0;
+            double curLon = 0;
+            double curAlt = 0;
+
+            //find cur location
+            if (currentLocation != null) {
+                curLat = roundTo5(currentLocation.getLatitude());
+                curLon = roundTo5(currentLocation.getLongitude());
+                curAlt = roundTo5(currentLocation.getAltitude());
+                genText.setText("Cur Loc "+ curLat + ", " + curLon);
+            } else {
+                    Toast.makeText(MainActivity.this, "Location not available", Toast.LENGTH_SHORT).show();
+            }
+
+            double fixLat = decodeBase62(vtuId.substring(2,6));
+            double fixLon = decodeBase62(vtuId.substring(6,10));
+            genText.append(" Fix "+ vtuId.substring(2,6) + ", " + vtuId.substring(6,10));
+
+
+            // Calculate distance ✏️
+            float[] result = new float[2];
+            Location.distanceBetween(fixLat, fixLon, curLat, curLon, result);
+            //distance = roundTo5(result[0]);
+            double distance = Math.round(result[0] * 10.0) / 10.0;
+            double bearing = roundTo5(result[1]);
+
+            //Toast.makeText(MainActivity.this, "Dist : " + distance + "Bearing : " + bearing, Toast.LENGTH_SHORT).show();
+            // toasted dist and bearing dist is too gib may be due to geo location  ✅
+
+            // Calculate heading ✏️
+            int headingIndex = (int) (((bearing + 11.25 + 360) % 360) / 22.5);
+            headingIndex = Math.min(Math.max(headingIndex, 0), 15); // Clamp to 0–15
+            char headingChar = (char) ('a' + headingIndex);
+
+            //Toast.makeText(MainActivity.this, "HeadIndex : " + headingChar , Toast.LENGTH_SHORT).show();
+            //toasted e it is correct
+
+            // Check if distance increased or decreased
+            String sign = "P";
+            if (previousDistance > 0) {
+                if (distance < previousDistance) {
+                    sign = "+"; // approaching
+                } else
+                    if (distance > previousDistance) {
+                    sign = "-"; // moving away
+                }
+            }
+
+            String heading = sign + headingChar;
+            previousDistance = distance;
+
+            //Toast.makeText(MainActivity.this, "Heading CodeDist : " + heading , Toast.LENGTH_SHORT).show();
+            // toasted -e correct  ✅
+
+            pushCode = findPushCode(heading);
+            locationText.append("\nPush Code: " + pushCode);
+            //showPopup("G90");

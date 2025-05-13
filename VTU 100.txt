@@ -1,0 +1,157 @@
+What are the modification done in original project
+1. Added one text view and button in main activity
+2. hide a visibility in fragment_terminal.xlm with adding android:visibility="gone"
+   a. <EditText
+             android:id="@+id/send_text"
+             android:visibility="gone"
+   b. <ImageButton
+             android:id="@+id/send_btn"
+             android:visibility="gone"
+   c.  <TextView
+              android:id="@+id/receive_text"
+              android:visibility="gone"
+
+3. Add code for Geo Location:
+    Added AndroidManifest.xml #9
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+4. Add in main activity
+
+       private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
+       private LocationManager locationManager;
+       private TextView locationText;
+
+       private final LocationListener locationListener = new LocationListener() {
+           @Override
+           public void onLocationChanged(@NonNull Location location) {
+               double lat = location.getLatitude();
+               double lon = location.getLongitude();
+               locationText.setText("Lat: " + lat + ", Lon: " + lon);
+           }
+       };
+
+5. This part is added end of .. onCreate(Bundle savedInstanceState)  method
+
+
+            onBackStackChanged();
+
+        //st4
+        locationText = findViewById(R.id.myTextView);
+        genText = findViewById(R.id.myLocView);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        locationText.setText("now ready");
+
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    LOCATION_PERMISSION_REQUEST_CODE
+
+            );
+            Toast.makeText(this, "T1: Heading Chars ", Toast.LENGTH_SHORT).show();
+        } else {
+
+
+            startGps();
+            locationText.append("\nGPS is started.");
+        }
+
+6. few methods are added at end of class
+
+//step 5
+    @SuppressLint("SetTextI18n")
+    private void startGps() {
+        // Check if GPS is enabled
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                locationText.setText("GPS is ON");
+
+                return;
+            }
+            locationManager.requestLocationUpdates( LocationManager.GPS_PROVIDER, 1000 , 1, locationListener);
+            locationText.setText("GPS is ON1");
+        } else {
+            locationText.setText("GPS is disabled.");
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //st6
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE &&
+                grantResults.length >= 2 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                locationText.setText("Loc permission Granted.");
+            startGps();
+        } else {
+            locationText.setText("Loc permission denied.");
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (locationManager != null) {
+            locationManager.removeUpdates(locationListener);
+        }
+    }
+💡 Conclusion :  📌
+1. ✅It is working on simulation of "Pixel 6a (Edited) API 34"
+2. 🚫It is failed Google Pixel 8a device and
+3. 🚫It is also failed samsung AM-A505F device
+
+
+Stp 7:
+took code from GT app
+used click button for getting location
+location is getting and display in genText view ✅
+added roundTo5 for in format 78.12345 ✅
+Now gen text is display Lat Lon Alt and bearing in this format ✅
+
+Stp 8
+1️⃣ Make globe variable to pass values from terminalFragment
+   string nodeId, string dataPayload , int offset
+2️⃣ Pass usb values
+3️⃣ use to find distance abd code
+4️⃣ find popup code
+5️⃣ based on this code keep track and use popUp
+
+Handler handler = new Handler();
+Runnable checkPushCode = new Runnable() {
+    @Override
+    public void run() {
+        if (MySharedClass.pushCode != null) {
+            myButton.performClick(); // simulate button click
+            MySharedClass.pushCode = null; // reset if needed
+        }
+        handler.postDelayed(this, 500); // check every 500ms
+    }
+};
+handler.post(checkPushCode);
+
+Copied a code from Popup_TL4
+added layout file
+added all required code
+crashing in some where in showPopup method
+
+   test
